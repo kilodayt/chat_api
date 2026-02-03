@@ -44,6 +44,9 @@ class ChatListCreateView(APIView):
 
 
 class ChatDetailView(APIView):
+    @extend_schema(
+        summary="Получение сообщений в чате",
+    )
     def get(self, request, pk):
         try:
             limit = int(request.query_params.get('limit', 20))
@@ -59,6 +62,9 @@ class ChatDetailView(APIView):
             "messages": MessageSerializer(messages, many=True).data,
         })
 
+    @extend_schema(
+        summary="Удаление чата",
+    )
     def delete(self, request, pk):
         ChatsService.delete_chat(chat_id=pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
