@@ -33,7 +33,7 @@ class ChatListCreateView(APIView):
             chat = ChatsService.create_chat(title=schema.title)
             return Response(ChatSerializer(chat).data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
-            return Response(e.messages, status=status.HTTP_400_BAD_REQUEST)
+            return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChatDetailView(APIView):
@@ -65,6 +65,6 @@ class MessageCreateView(APIView):
 
             return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
-            return Response(e.messages, status=status.HTTP_400_BAD_REQUEST)
+            return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
 
 
