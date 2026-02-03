@@ -15,7 +15,7 @@ GET /chats/{id} — получить чат и последние N сообще
 DELETE /chats/{id} — удалить чат вместе со всеми сообщениями
  Response: 204 No Content (или json-статус)
 """
-
+from drf_spectacular.utils import extend_schema
 from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
@@ -25,15 +25,22 @@ from .serializers import ChatSerializer, MessageSerializer
 from .services import ChatsService
 from apps.chats.schemas import ChatCreateSchema, MessageCreateSchema
 
+import json
+
 
 class ChatListCreateView(APIView):
+    @extend_schema(
+        summary="Создание чата",
+        request=ChatCreateSchema,
+        responses={201: ChatSerializer},
+    )
     def post(self, request):
         try:
             schema = ChatCreateSchema(**request.data)
             chat = ChatsService.create_chat(title=schema.title)
             return Response(ChatSerializer(chat).data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
-            return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
+            return Response(json.loads(e.json()), status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChatDetailView(APIView):
@@ -58,6 +65,11 @@ class ChatDetailView(APIView):
 
 
 class MessageCreateView(APIView):
+    @extend_schema(
+        summary="Создание сообщения",
+        request=MessageCreateSchema,
+        responses={201: MessageSerializer},
+    )
     def post(self, request, pk):
         try:
             schema = MessageCreateSchema(**request.data)
@@ -65,6 +77,4 @@ class MessageCreateView(APIView):
 
             return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
-            return Response(e.errors(), status=status.HTTP_400_BAD_REQUEST)
-
-
+            return Response(json.loads(e.json()), status=status.HTTP_400_BAD_REQUEST)
